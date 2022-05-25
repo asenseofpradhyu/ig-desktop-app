@@ -20,7 +20,7 @@ To setup this project locally for development purposes please follow the followi
 
 1. Ensure you Node.js installed. [See](https://nodejs.org/en/download/)
 
-2. Clone this repo by running the command - `git clone https://github.com/ifedapoolarewaju/igdm.git`
+2. Clone this repo by running the command - `git clone https://github.com/pradhuman01/ig-desktop-app.git`
 
 3. Navigate to the directory where the repo is cloned to. (e.g `cd igdm`)
 
