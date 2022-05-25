@@ -1,8 +1,8 @@
 const electron = require('electron');
-const { clipboard } = require('electron')
+const { clipboard } = require('electron');
 const path = require('path'); 
 const fs = require('fs');
-const {basename} = require('path')
+const {basename} = require('path');
 var XLSX = require('xlsx');
 const { Menu, MenuItem } = electron.remote;
 const ipcRenderer = electron.ipcRenderer;

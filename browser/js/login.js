@@ -23,16 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const btn = document.querySelector('#btn');
-  var btntext='Im here from Test Button';
+  let btntext='Im here from Test Button';
 
-  btn.addEventListener('click', function(){
+  btn.addEventListener('click', function () {
 
     ipcRenderer.send('btnTest', { btntext });
-    console.log("Send..");
+    console.log('Send..');
 
   });
   
-  ipcRenderer.on('onbtnTest', (event, msg)=>{
+  ipcRenderer.on('onbtnTest', (event, msg) => {
     // const errorElement = document.getElementById('div'); 
     // errorElement.innerHTML += msg;
     // var content = document.createTextNode("<p>");
