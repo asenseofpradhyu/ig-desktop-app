@@ -7,6 +7,8 @@ const instagram = require('./instagram');
 const autoUpdater = require('./autoupdater');
 const client = require('electron-connect').client;
 const {autoUpdatePreference} = require('./userpreferences');
+const appMenu = electron.remote;
+const MenuItem = electron.MenuItem;
 
 // fixes electron's timeout inconsistency
 // not doing this on windows because the fix doesn't work for windows.
@@ -20,34 +22,100 @@ let pollingInterval = 10000;
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let testMainWindow
+let viewPage;
 let authenticatedUser;
 
-function createWindow () {
+function TestWindow(){
+
+  // if(!testMainWindow){
+    testMainWindow = new BrowserWindow({
+      width: 1200,
+      height: 800,
+      icon: `${__dirname}/../browser/img/icon.png`,
+      minWidth: 500,
+      minHeight: 400,
+      webPreferences:{
+        nodeIntegration:true
+      }
+    });
+  // }
+    const view = '../browser/test.html';
+    testMainWindow.loadURL(url.format({
+      pathname: path.join(__dirname, view),
+      protocol: 'file:',
+      slashes: true
+    }));
+
+    testMainWindow.on('closed', () => testMainWindow = null);
+}
+
+function createWindow (viewPage) {
   if (!mainWindow) {
     mainWindow = new BrowserWindow({
       width: 1200,
       height: 800,
       icon: `${__dirname}/../browser/img/icon.png`,
       minWidth: 500,
-      minHeight: 400
+      minHeight: 400,
+      webPreferences: { 
+        enableremotemodule: true,
+        nodeIntegration: true
+   } 
     });
   }
-  mainWindow.setTitle('IGdm - Instagram Desktop Messenger');
+  mainWindow.setTitle('Instagram DM Marketing Tool by Pradhumansinh Padhiyar');
 
-  instagram.hasActiveSession().then((result) => {
-    const view = result.isLoggedIn ? '../browser/index.html' : '../browser/login.html';
-    authenticatedUser = result.userInfo || authenticatedUser;
+  switch(viewPage) {
+    case 'main':
+      // Main View
+      instagram.hasActiveSession().then((result) => {
+        viewPage = result.isLoggedIn ? '../browser/index.html' : '../browser/login.html';
+        authenticatedUser = result.userInfo || authenticatedUser;
+    
+        mainWindow.loadURL(url.format({
+          pathname: path.join(__dirname, viewPage),
+          protocol: 'file:',
+          slashes: true
+        }));
+      });
+      break;
 
-    mainWindow.loadURL(url.format({
-      pathname: path.join(__dirname, view),
-      protocol: 'file:',
-      slashes: true
-    }));
-  });
+    case 'profileid':
+      //Get Profile ID View
+      viewPage = '../browser/getProfileID.html';
+      mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, viewPage),
+        protocol: 'file:',
+        slashes: true
+      }));
+      mainWindow.openDevTools();
+      console.log("Click");
+      break;
+
+    case 'dm':
+      // DM View
+      viewPage = '../browser/dm.html';
+      mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, viewPage),
+        protocol: 'file:',
+        slashes: true
+      }));
+      mainWindow.openDevTools();
+      break;
+
+    default:
+      // code block
+  }
+
+
+
+  
   // If we're in development mode then create an Electron Connect client for live reload.
   if (process.defaultApp) { 
     client.create(mainWindow);
   }
+  // mainWindow.openDevTools();
   mainWindow.on('closed', () => mainWindow = null);
 }
 
@@ -58,7 +126,7 @@ function createOtpWindow (type) {
     resizable: false,
     icon: `${__dirname}/../browser/img/icon.png`,
   });
-  otpWindow.setTitle('IGdm - Instagram verification code');
+  otpWindow.setTitle('Instagram verification code');
   otpWindow.loadURL(url.format({
     pathname: path.join(__dirname, `../browser/${type}.html`),
     protocol: 'file:',
@@ -175,14 +243,78 @@ function handleTwoFactor (error) {
 app.setAppUserModelId('com.ifedapoolarewaju.desktop.igdm');
 
 app.on('ready', () => {
-  createWindow();
+
+  createWindow('main');
+  
   // only set the menu template when in production mode/
   // this also leaves the dev console enabled when in dev mode.
-  const baseMenu = (process.defaultApp ? Menu.getApplicationMenu().items : null);
-  createMenuTemplate(baseMenu).then((template) => {
-    const menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(menu);
-  });
+  // const baseMenu = (process.defaultApp ? Menu.getApplicationMenu().items : null);
+  // createMenuTemplate(baseMenu).then((template) => {
+  //   const menu = Menu.buildFromTemplate(template);
+  //   Menu.setApplicationMenu(menu);
+  // });
+
+ const menuTray = [
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      { role: 'pasteandmatchstyle' },
+      { role: 'delete' },
+      { role: 'selectall' }
+    ]
+  },
+  {
+    label: 'DM',
+    submenu: [
+      {
+        label: 'Open',
+        click: function () {
+          createWindow('dm');
+        }
+      },
+      {
+        label: 'Get User ProfileID',
+        click: function () {
+          createWindow('profileid');
+        }
+      }
+    ]
+  },
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'About Developer',
+        click: function () {
+          electron.shell.openExternal('www.insatgram.com/lovecoders');
+        },
+        accelerator: 'CmdOrCtrl + Shift + H'
+      }
+    ]
+  },
+  {
+    role: 'window',
+    submenu: [
+      { role: 'minimize' },
+      { role: 'close' }
+    ]
+  }
+ ];
+
+ const m = Menu.buildFromTemplate(menuTray);
+ Menu.setApplicationMenu(m);
+
+
+
+
+
+
   if (autoUpdatePreference.autoUpdateStatus) {
     autoUpdater.init();
   }
@@ -197,7 +329,7 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   // only call createWindow after mainWindow is set to null at
   // mainWindow.on('closed')
-  if (mainWindow === null) createWindow();
+  if (mainWindow === null) createWindow('main');
 });
 
 // reduce polling frequency when app is not active.
@@ -217,7 +349,7 @@ electron.ipcMain.on('login', (evt, data) => {
   const login = () => {
     instagram.login(data.username, data.password).then((userInfo) => {
       authenticatedUser = userInfo;
-      createWindow();
+      createWindow('main');
     }).catch((error) => {
       if (instagram.isCheckpointError(error)) {
         handleCheckpoint(error)
@@ -227,7 +359,7 @@ electron.ipcMain.on('login', (evt, data) => {
         handleTwoFactor(error)
           .then((userInfo) => {
             authenticatedUser = userInfo;
-            createWindow();
+            createWindow('main');
           })
           .catch((tferror) => mainWindow.webContents.send('loginError', getErrorMsg(tferror)));
       } else {
@@ -243,10 +375,32 @@ electron.ipcMain.on('login', (evt, data) => {
   login();
 });
 
+// electron.ipcMain.on('btnTest', (event, data) => {
+
+//   const text = "Sending from Main";
+//   if(data.btntext != ''){
+//     event.sender.send('onbtnTest', data.btntext);
+//     TestWindow();
+//     console.log(text);
+//   }
+
+//   const test = () =>{
+//     mainWindow.webContents.send('onbtnTest', text);
+//     TestWindow();
+//     console.log(data.btntext);
+//   }
+
+// // test();
+  
+//   // console.log(data.btntext);
+  
+
+// });
+
 electron.ipcMain.on('logout', () => {
   instagram.logout();
   authenticatedUser = null;
-  createWindow();
+  createWindow('main');
 });
 
 electron.ipcMain.on('getLoggedInUser', () => {
@@ -274,6 +428,7 @@ function messageSent (chatId, trackerKey) {
 electron.ipcMain.on('message', (_, data) => {
   const messageTracker = data.trackerKey;
   if (data.isNewChat) {
+    console.log(data.message, data.users);
     instagram.sendNewChatMessage(data.message, data.users).then((chat) => {
       getChat(null, chat.thread_id);
       getChatList();
@@ -324,4 +479,42 @@ electron.ipcMain.on('getDisplayPictureUrl', (_, userId) => {
   instagram.getUser(userId).then((user) => {
     mainWindow.webContents.send('getDisplayPictureUrl', { userId: userId, url: user.profile_pic_url });
   });
+});
+
+
+// Send to DM
+electron.ipcMain.on('searchUsersDmList', (_, search) => {
+  instagram.searchUsers(search).then((users) => {
+    mainWindow.webContents.send('searchResultDmList', users);
+  });
+
+});
+
+electron.ipcMain.on('sendmsglist', (_, data) => {
+
+ instagram.sendNewChatMessage(data.data.msg, data.userID).then(() => {
+
+  // Send Profile
+  if(data.data.profileId){
+ 
+  instagram.sendProfile(data.data.profileId, data.userID).then(() => {
+    // mainWindow.webContents.send('sentSuccessfully', data.userID);
+    console.log("Send Profile..");
+  }).catch((err) => {
+    console.log(err);
+  });
+}
+    mainWindow.webContents.send('sentSuccessfully', data.userID);
+    console.log("Send..");
+  }).catch((err) => {
+    console.log(err);
+  });
+});
+
+
+
+
+// Back & Foward Functions
+electron.ipcMain.on('backToHome', () => {
+  mainWindow.webContents.goBack();
 });

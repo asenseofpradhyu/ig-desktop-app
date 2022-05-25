@@ -163,6 +163,13 @@ exports.sendMessage = function (message, chatId) {
   });
 };
 
+exports.sendProfile = function (profileID, recipients) {
+  return new Promise((resolve, reject) => {
+    const directThread = igClient.entity.directThread(recipients);
+    directThread.broadcastProfile(profileID).then(resolve).catch(reject);
+  });
+};
+
 exports.searchUsers = function (search) {
   return new Promise((resolve, reject) => {
     igClient.user.search(search).then(resolve).catch(reject);

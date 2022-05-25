@@ -1,0 +1,31 @@
+extends _layout
+
+append head
+  link(rel='stylesheet', type='text/css', href='css/app.css')
+
+block body
+  body
+    .container.mt-2
+        button#back-btn.loginButton.btn.btn-primary(type='button') Back
+        form
+          .form-group
+           h3 Upload Username List
+           button#upload.loginButton.btn.btn-primary(type='button') Upload File
+          .form-group
+           label(for='Message') Message
+           textarea#Message.form-control(rows='3')
+          .form-group.form-check
+           input#profileCheck.form-check-input(type='checkbox')
+           label.form-check-label(for='#profileCheck') Send Profile
+           .profileTextbox
+        input#submit.btn.btn-primary(type='button', value='Send Message')
+
+              
+      
+  script(type='text/javascript', src='../node_modules/nojs/dist/no.min.js')
+  script(type='text/javascript', src='js/globals.js')
+  script(type='text/javascript', src='js/emoji.js')
+  script(type='text/javascript', src='js/carousel.js')
+  script(type='text/javascript', src='js/funcs.js')
+  script(type='text/javascript', src='js/renderers.js')
+  script(type='text/javascript', src='js/dm.js')

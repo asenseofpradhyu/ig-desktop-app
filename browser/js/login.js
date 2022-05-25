@@ -22,5 +22,27 @@ document.addEventListener('DOMContentLoaded', () => {
     errorElement.innerHTML = errorMessage;
   });
 
-  document.querySelector('a').onclick = () => electron.shell.openExternal('https://github.com/ifedapoolarewaju/igdm');
+  const btn = document.querySelector('#btn');
+  var btntext='Im here from Test Button';
+
+  btn.addEventListener('click', function(){
+
+    ipcRenderer.send('btnTest', { btntext });
+    console.log("Send..");
+
+  });
+  
+  ipcRenderer.on('onbtnTest', (event, msg)=>{
+    // const errorElement = document.getElementById('div'); 
+    // errorElement.innerHTML += msg;
+    // var content = document.createTextNode("<p>");
+    // errorElement.appendChild(content);
+    
+    console.log('Test.js');
+    console.log(msg);
+  });
+  
+
+
+  // document.querySelector('a').onclick = () => electron.shell.openExternal('https://www.google.com');
 });

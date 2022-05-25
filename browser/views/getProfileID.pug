@@ -1,0 +1,29 @@
+extends _layout
+
+append head
+  link(rel='stylesheet', type='text/css', href='css/app.css')
+
+block body
+  body
+    .container.mt-2
+        button#back-btn.loginButton.btn.btn-primary(type='button') Back
+        form
+            .form-group
+              label(for='username') Enter Username
+              input#username.form-control(type='text' placeholder='Enter Username') 
+            .form-group#profileIdDiv
+              label(for='userid') Copy Profile ID
+              input#userid.form-control(type='text' placeholder='Copy UserID' disabled)
+              button#btn(type='button') Copy Text
+            input#submit.btn.btn-primary(type='button' value='Submit') 
+
+        
+              
+      
+  script(type='text/javascript', src='../node_modules/nojs/dist/no.min.js')
+  script(type='text/javascript', src='js/globals.js')
+  script(type='text/javascript', src='js/emoji.js')
+  script(type='text/javascript', src='js/carousel.js')
+  script(type='text/javascript', src='js/funcs.js')
+  script(type='text/javascript', src='js/renderers.js')
+  script(type='text/javascript', src='js/getprofileid.js')
